@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>KaifPost</title>
+
+ 
+<style>
+body {
+	background-image: url("https://img.pikbest.com/ai/illus_our/20230427/63736cbefed71660045f1ced0b1690f3.jpg!w700wp");
+} 
+
+</style>
+
+</head>
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjgXOB743Ga_MUSXr9W3byUVcU5RV7zasrWpP27SNG1f7r2gUZc97OP1n1GAXnAjaIF8j-ReUaPvjOif-hoIo0DLpuQ3oYLsQunY8Rif3TBya2nhjE-WwpLLdeY8rY3-ZFmxbE-o1-ZfJKo6_7gS_8KUSHshTlUSjP0FjmB5DXyxQzly6-E9xPaq4iq_7M/w683-h277/images%20(2).jfif" />
+<body>
+<div style="font-family: sans-serif; text-align: center; padding: 20px;">
+  <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+  
+  <label style="background: #6200ee; color: white; padding: 15px 30px; border-radius: 8px; cursor: pointer; display: inline-block;">
+    <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
+     Выбрать фото
+  </label>
+
+  <button onclick="clearGallery()" style="background: #ff0266; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+    Удалить всё
+  </button>
+
+  <p>Твоя вечная галерея (пока место не кончится):</p>
+  <div id="gallery" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
+
+</div>
+
+<script>
+  const input = document.getElementById('photo-input');
+  const gallery = document.getElementById('gallery');
+
+  // 1. Загружаем фотки из памяти при открытии страницы
+  window.onload = () => {
+    const savedPhotos = JSON.parse(localStorage.getItem('my_photos') || '[]');
+    savedPhotos.forEach(src => addImgToGallery(src));
+  };
+
+  input.onchange = (event) => {
+    for (const file of input.files) {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const base64Image = e.target.result; // Превращаем фото в длинную строку текста
+        addImgToGallery(base64Image);
+        saveToLocalStorage(base64Image);
+      };
+      
+      reader.readAsDataURL(file); // Читаем файл
+    }
+  };
+
+  function addImgToGallery(src) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width = "150px";
+    img.style.height = "150px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "8px";
+    gallery.appendChild(img);
+  }
+
+  function saveToLocalStorage(src) {
+    const photos = JSON.parse(localStorage.getItem('my_photos') || '[]');
+    photos.push(src);
+    try {
+      localStorage.setItem('my_photos', JSON.stringify(photos));
+    } catch (e) {
+      alert("Место в браузере кончилось! Миллион не влезет :(");
+    }
+  }
+
+  function clearGallery() {
+    localStorage.removeItem('my_photos');
+    gallery.innerHTML = '';
+  }
+</script>
+
+<a href="glavnoe.html">
+  <button type="button">вернутса на страницу</button>
+</a>
+<a href="videos.html">
+  <button type="button">Смотреть видео</button>
+</a>
+</body>
+</html
+<div id="simple-comment-root" style="all: initial; font-family: sans-serif; display: block; max-width: 500px; margin: 20px auto; padding: 10px;">
+    
+    <div style="background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+        <textarea id="cmnt-text" placeholder="Ваш комментарий..." style="width: 100%; height: 60px; margin-bottom: 10px; display: block; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; padding: 5px;"></textarea>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <input type="file" id="cmnt-file" accept="image/*" style="font-size: 12px; max-width: 60%;">
+            <button onclick="postCmnt()" style="background: #28a745; color: white; border: none; padding: 7px 15px; border-radius: 4px; cursor: pointer;">Ок</button>
+        </div>
+    </div>
+
+    <div id="cmnt-list" style="margin-top: 20px;"></div>
+
+    <script>
+        const storageKey = 'site_comments_data';
+
+        function postCmnt() {
+            const txt = document.getElementById('cmnt-text');
+            const fileInput = document.getElementById('cmnt-file');
+            const file = fileInput.files[0];
+
+            if (!txt.value && !file) return;
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => saveCmnt(txt.value, e.target.result);
+                reader.readAsDataURL(file);
+            } else {
+                saveCmnt(txt.value, null);
+            }
+            txt.value = ''; fileInput.value = '';
+        }
+
+        function saveCmnt(text, img) {
+            const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            data.unshift({ text, img, id: Date.now() });
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            drawCmnts();
+        }
+
+        function drawCmnts() {
+            const box = document.getElementById('cmnt-list');
+            const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            box.innerHTML = data.map(i => `
+                <div style="border-bottom: 1px dashed #ccc; padding: 10px 0; color: #333;">
+                    <p style="margin: 0 0 5px 0; font-size: 14px;">${i.text}</p>
+                    ${i.img ? `<img src="${i.img}" style="max-width: 100%; border-radius: 5px; display: block;">` : ''}
+                    <span onclick="delCmnt(${i.id})" style="color: red; font-size: 10px; cursor: pointer; text-decoration: underline;">удалить</span>
+                </div>
+            `).join('');
+        }
+
+        function delCmnt(id) {
+            let data = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            data = data.filter(i => i.id !== id);
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            drawCmnts();
+        }
+
+        drawCmnts();
+    </script>
+</div>
